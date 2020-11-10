@@ -6,6 +6,8 @@ from sklearn.pipeline import Pipeline
 from sklearn.base import BaseEstimator, TransformerMixin
 from sklearn.feature_selection import SelectKBest
 from sklearn.preprocessing import KBinsDiscretizer, OneHotEncoder
+from sklearn.metrics import confusion_matrix, plot_confusion_matrix
+
 
 from sklearn.ensemble import RandomForestClassifier, AdaBoostClassifier, GradientBoostingClassifier
 from sklearn.naive_bayes import BernoulliNB, BaseEstimator, BaseNB
@@ -45,17 +47,12 @@ class Cleaner(BaseEstimator):
         X = pd.get_dummies(X)
         return X
 
-# class CustomTargetTransformer(BaseEstimator, TransformerMixin):
 
-#     def __init__(self, target):
-#         return self
-
-#     def transform(self, target):
-
-def assess_categorical_correlation(column_name, dataframe):
+def assess_categorical_correlation_printout(column_name, dataframe):
     working_total = []
     broken_total = []
     fixable_total = []
+
     for value in dataframe[column_name].unique():
         all_working = len(dataframe.loc[(dataframe[column_name] == value) & (dataframe['status_group'] == 'functional')])
         all_broken = len(dataframe.loc[(dataframe[column_name] == value) & (dataframe['status_group'] == 'non functional')])
@@ -78,3 +75,46 @@ def assess_categorical_correlation(column_name, dataframe):
     print(f'working {np.array(working_total).mean()}')
     print(f'broken {np.array(broken_total).mean()}')
     print(f'fixable {np.array(fixable_total).mean()}')
+
+def assess_categorical_correlation_dict(column_name, dataframe):
+    working_total = []
+    broken_total = []
+    fixable_total = []
+
+    cat_dicts = []
+
+    for value in dataframe[column_name].unique():
+        all_working = len(dataframe.loc[(dataframe[column_name] == value) & (dataframe['status_group'] == 'functional')])
+        all_broken = len(dataframe.loc[(dataframe[column_name] == value) & (dataframe['status_group'] == 'non functional')])
+        all_fixable = len(dataframe.loc[(dataframe[column_name] == value) & (dataframe['status_group'] == 'functional needs repair')])
+        total_val = len(dataframe.loc[dataframe[column_name] == value])
+
+        working_perc = all_working / total_val
+        broken_perc = all_broken / total_val
+        fixable_perc = all_fixable / total_val
+
+        working_total.append(working_perc)
+        broken_total.append(broken_perc)
+        fixable_total.append(fixable_perc)
+
+        single_cat_dict = {}
+        single_cat_dict['value'] = value.upper()
+        single_cat_dict['Percent Working'] = working_perc
+        single_cat_dict['Percent Broken'] = broken_perc
+        single_cat_dict['Percent Needing Repair'] = fixable_perc
+        cat_dicts.append(single_cat_dict) 
+    
+    totals_dict = {'value': 'overall', 'Percent Working': np.array(working_total).mean(), 'Percent Broken': np.array(broken_total).mean(),
+                                        'Percent Needing Repair': np.array(fixable_total).mean()}
+    cat_dicts.append(totals_dict)
+    return cat_dicts
+
+def plot_comparison_chart(category, df, overall=True):
+    comp_dict_list = assess_categorical_correlation_dict(category, df)
+    if not overall:
+        comp_dict_list = comp_dict_list[0:-1]
+    comp_df = pd.DataFrame(comp_dict_list)
+    comp_df = comp_df.set_index('value')
+    comp_df = comp_df.sort_values('value')
+    ax = comp_df.plot.bar(rot=0, figsize=(20,10))
+    plt.show()
