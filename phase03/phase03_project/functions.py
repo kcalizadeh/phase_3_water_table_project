@@ -38,10 +38,10 @@ class Cleaner(BaseEstimator):
             X['funder'] = X['funder'].fillna(value='unknown', axis=0)
             X['public_meeting'] = X['public_meeting'].fillna(value='unknown', axis=0)
             X['scheme_management'] = X['scheme_management'].fillna(value='unknown', axis=0)
-            X['waterpoint_type_group'] = X['waterpoint_type_group'].map(lambda x: lambda x: 'other' if x == 'dam' 
-                                                                        else 'other' if x == 'cattle trough' 
-                                                                        else 'other' if x == 'improved spring' else x)
-
+            X['waterpoint_type_group'] = X['waterpoint_type_group'].map(lambda x: 'dam, trough, or spring' if x == 'dam' 
+                                                                                else 'dam, trough, or spring' if x == 'cattle trough' 
+                                                                                else 'dam, trough, or spring' if x == 'improved spring'
+                                                                                else x)
         except:
             X = X
         X = pd.get_dummies(X)
@@ -98,23 +98,31 @@ def assess_categorical_correlation_dict(column_name, dataframe):
         fixable_total.append(fixable_perc)
 
         single_cat_dict = {}
-        single_cat_dict['value'] = value.upper()
+        single_cat_dict['value'] = value.title()
         single_cat_dict['Percent Working'] = working_perc
-        single_cat_dict['Percent Broken'] = broken_perc
+        single_cat_dict['Percent Non Functional'] = broken_perc
         single_cat_dict['Percent Needing Repair'] = fixable_perc
         cat_dicts.append(single_cat_dict) 
     
-    totals_dict = {'value': 'overall', 'Percent Working': np.array(working_total).mean(), 'Percent Broken': np.array(broken_total).mean(),
+    totals_dict = {'value': 'overall', 'Percent Working': np.array(working_total).mean(), 'Percent Non Functional': np.array(broken_total).mean(),
                                         'Percent Needing Repair': np.array(fixable_total).mean()}
     cat_dicts.append(totals_dict)
     return cat_dicts
 
-def plot_comparison_chart(category, df, overall=True):
+def plot_comparison_chart(category, df, overall=True, norm_line=False):
     comp_dict_list = assess_categorical_correlation_dict(category, df)
+    overalls = comp_dict_list[-1]
     if not overall:
         comp_dict_list = comp_dict_list[0:-1]
     comp_df = pd.DataFrame(comp_dict_list)
     comp_df = comp_df.set_index('value')
     comp_df = comp_df.sort_values('value')
     ax = comp_df.plot.bar(rot=0, figsize=(20,10))
-    plt.show()
+    if norm_line:
+        plt.axhline(label='Mean Working Percent', y=overalls['Percent Working'], dash_joinstyle='miter', color='red', ls='-.')
+    plt.legend()
+    plt.ylabel('Percent', size='x-large')
+    ax.tick_params(axis='x', labelsize=12)
+    vals = ax.get_yticks()
+    ax.set_yticklabels(['{:.0%}'.format(x) for x in vals])
+    return ax
