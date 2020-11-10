@@ -119,7 +119,7 @@ def plot_comparison_chart(category, df, overall=True, norm_line=False):
     comp_df = comp_df.sort_values('value')
     ax = comp_df.plot.bar(rot=0, figsize=(20,10))
     if norm_line:
-        plt.axhline(label='Mean Working Percent', y=overalls['Percent Working'], dash_joinstyle='miter', color='red', ls='-.')
+        plt.axhline(label='Global Well Functionality Rate', y=.5466, dash_joinstyle='miter', color='gray', ls='--')
     plt.legend()
     plt.ylabel('Percent', size='x-large')
     ax.tick_params(axis='x', labelsize=12)
