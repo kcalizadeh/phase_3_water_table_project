@@ -1,19 +1,20 @@
 import numpy as np
 import pandas as pd 
 
+from imblearn.over_sampling import SMOTE
+from imblearn.pipeline import Pipeline
+
 from sklearn.model_selection import train_test_split, GridSearchCV
-from sklearn.pipeline import Pipeline
 from sklearn.base import BaseEstimator, TransformerMixin
 from sklearn.feature_selection import SelectKBest
-from sklearn.preprocessing import KBinsDiscretizer, OneHotEncoder
+from sklearn.preprocessing import KBinsDiscretizer, OneHotEncoder, StandardScaler
 from sklearn.metrics import confusion_matrix, plot_confusion_matrix
-
+from sklearn.ensemble import AdaBoostClassifier, GradientBoostingClassifier
 
 from sklearn.ensemble import RandomForestClassifier, AdaBoostClassifier, GradientBoostingClassifier
 from sklearn.naive_bayes import BernoulliNB, BaseEstimator, BaseNB
 from sklearn.linear_model import LogisticRegression
 from sklearn.neighbors import KNeighborsClassifier
-from sklearn.pipeline import Pipeline
 
 import matplotlib.pyplot as plt
 import seaborn as sns
@@ -31,22 +32,16 @@ class Cleaner(BaseEstimator):
         return self 
     
     def transform( self, X, y = None):
-        # to_drop = X.loc[X['amount_tsh'] > 40005].index
-        # X = X.drop(to_drop)
-        # y = y.drop(to_drop)
-        try:
-            X['funder'] = X['funder'].fillna(value='unknown', axis=0)
-            X['public_meeting'] = X['public_meeting'].fillna(value='unknown', axis=0)
-            X['scheme_management'] = X['scheme_management'].fillna(value='unknown', axis=0)
-            X['waterpoint_type_group'] = X['waterpoint_type_group'].map(lambda x: 'dam, trough, or spring' if x == 'dam' 
+        X['public_meeting'] = X['public_meeting'].fillna(value='unknown', axis=0)
+        X['waterpoint_type_group'] = X['waterpoint_type_group'].map(lambda x: 'dam, trough, or spring' if x == 'dam' 
                                                                                 else 'dam, trough, or spring' if x == 'cattle trough' 
                                                                                 else 'dam, trough, or spring' if x == 'improved spring'
                                                                                 else x)
-        except:
-            X = X
+        X['extraction_type_class'] = X['extraction_type_class'].map(lambda x: 'other' if x == 'wind-powered' 
+                                                                                else 'other' if x == 'rope pump' 
+                                                                                else x)
         X = pd.get_dummies(X)
         return X
-
 
 def assess_categorical_correlation_printout(column_name, dataframe):
     working_total = []
@@ -109,15 +104,14 @@ def assess_categorical_correlation_dict(column_name, dataframe):
     cat_dicts.append(totals_dict)
     return cat_dicts
 
-def plot_comparison_chart(category, df, overall=True, norm_line=False):
+def plot_comparison_chart(category, df, overall=True, norm_line=False, cmap='Pastel1'):
     comp_dict_list = assess_categorical_correlation_dict(category, df)
-    overalls = comp_dict_list[-1]
     if not overall:
         comp_dict_list = comp_dict_list[0:-1]
     comp_df = pd.DataFrame(comp_dict_list)
     comp_df = comp_df.set_index('value')
     comp_df = comp_df.sort_values('value')
-    ax = comp_df.plot.bar(rot=0, figsize=(20,10))
+    ax = comp_df.plot.bar(rot=0, figsize=(20,10), cmap=cmap)
     if norm_line:
         plt.axhline(label='Global Well Functionality Rate', y=.5466, dash_joinstyle='miter', color='gray', ls='--')
     plt.legend()
@@ -126,3 +120,13 @@ def plot_comparison_chart(category, df, overall=True, norm_line=False):
     vals = ax.get_yticks()
     ax.set_yticklabels(['{:.0%}'.format(x) for x in vals])
     return ax
+
+def plot_pretty_cf(predictor, xtest, ytest, cmap='binary', normalize='true', title=None):
+    fig, ax = plt.subplots(figsize=(8, 8))
+    plot_confusion_matrix(predictor, xtest, ytest, cmap=cmap, normalize=normalize, ax=ax)
+    ax.set_title(title, size='x-large')
+    ax.set_yticklabels(['Functional', 'Needs Repair', 'Non-Functional'])
+    ax.set_xticklabels(['Functional', 'Needs Repair', 'Non-Functional'])
+    ax.set_xlabel('Predicted Label', size='large')
+    ax.set_ylabel('True Label', size='large')
+    plt.show()
