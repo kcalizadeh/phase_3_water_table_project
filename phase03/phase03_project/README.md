@@ -23,7 +23,11 @@ Here we examined the connection between various features and the functionality o
 ![title](images/well_functionality_by_year.png)
 
 ### Model
-We built a Random Forest model and used a grid search to tweak hyperparameters. Our final model was reasonably accurate. Results were confirmed with a confusion matrix. Overall, it was the repairable wells that were hardest to classify. This is likely due in part to a class imbalance, but SMOTE was not able to correct the problem and indeed made our model worse.
+We built a Random Forest model and used a grid search to tweak hyperparameters. Our final model was reasonably accurate. Results were confirmed with a confusion matrix. Overall, it was the repairable wells that were hardest to classify. This is likely due in part to a class imbalance, but SMOTE was not able to correct the problem and indeed made our model worse. 
+
+Upon submission, this was our highest score:
+
+![](images/submission_result2.png)
 
 ### Interpret
 The most important features for our model were the geographic features, especially latitude, longitude, and gps_height. Other relevant strong features were waterpoint type and extraction method. 
