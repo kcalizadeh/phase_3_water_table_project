@@ -32,7 +32,9 @@ class Cleaner(BaseEstimator):
         return self 
     
     def transform( self, X, y = None):
+        # fill blanks
         X['public_meeting'] = X['public_meeting'].fillna(value='unknown', axis=0)
+        # consolidate rare groups into bigger groups
         X['waterpoint_type_group'] = X['waterpoint_type_group'].map(lambda x: 'dam, trough, or spring' if x == 'dam' 
                                                                                 else 'dam, trough, or spring' if x == 'cattle trough' 
                                                                                 else 'dam, trough, or spring' if x == 'improved spring'
@@ -40,6 +42,26 @@ class Cleaner(BaseEstimator):
         X['extraction_type_class'] = X['extraction_type_class'].map(lambda x: 'other' if x == 'wind-powered' 
                                                                                 else 'other' if x == 'rope pump' 
                                                                                 else x)
+        # take the top members of a category and group the rest together                                                            
+        X['management'] = X['management'].map(lambda x: x if x == 'vwc' 
+                                                            else x if x == 'wug' 
+                                                            else x if x == 'water board' 
+                                                            else x if x == 'wua' 
+                                                            else x if x == 'private operator' 
+                                                            else x if x == 'parastatal' 
+                                                            else 'misc.')
+        X['funder'] = X['funder'].map(lambda x: x if x == 'Government Of Tanzania' 
+                                                        else x if x == 'Danida' 
+                                                        else x if x == 'Hesawa' 
+                                                        else x if x == 'Rwssp' 
+                                                        else x if x == 'World Bank' 
+                                                        else x if x == 'World Vision' 
+                                                    else 'misc.')
+        X['installer'] = X['installer'].map(lambda x: x if x == 'DWE' 
+                                                        else x if x == 'Government' 
+                                                        else x if x == 'RWE' 
+                                                        else 'misc.')
+        # dummify categorical columns
         X = pd.get_dummies(X)
         return X
 
@@ -104,7 +126,7 @@ def assess_categorical_correlation_dict(column_name, dataframe):
     cat_dicts.append(totals_dict)
     return cat_dicts
 
-def plot_comparison_chart(category, df, overall=True, norm_line=False, cmap='Pastel1'):
+def plot_comparison_chart(category, df, overall=False, norm_line=False, cmap='Pastel1'):
     comp_dict_list = assess_categorical_correlation_dict(category, df)
     if not overall:
         comp_dict_list = comp_dict_list[0:-1]
@@ -113,7 +135,7 @@ def plot_comparison_chart(category, df, overall=True, norm_line=False, cmap='Pas
     comp_df = comp_df.sort_values('value')
     ax = comp_df.plot.bar(rot=0, figsize=(20,10), cmap=cmap)
     if norm_line:
-        plt.axhline(label='Global Well Functionality Rate', y=.5466, dash_joinstyle='miter', color='gray', ls='--')
+        plt.axhline(label='Overall Well Functionality Rate', y=.5466, dash_joinstyle='miter', color='gray', ls='--')
     plt.legend()
     plt.ylabel('Percent', size='x-large')
     ax.tick_params(axis='x', labelsize=12)
