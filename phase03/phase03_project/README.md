@@ -6,6 +6,7 @@
 - an EDA notebook containing some visualizations and exploration
 - a model notebook explaining our model and going over various iterations
 - a functions file containing custom functions and imports used in both notebooks
+- a slide deck presentation of the findings
 
 This repo contains work for the Pump It Up data science competition. The competition website can be found [here](https://www.drivendata.org/competitions/7/pump-it-up-data-mining-the-water-table/page/23/).
 
@@ -22,15 +23,22 @@ Here we examined the connection between various features and the functionality o
 ![title](images/well_functionality_by_year.png)
 
 ### Model
-We built a Random Forest model and used a grid search to tweak hyperparameters. Our final model was reasonably accurate. Results were confirmed with a confusion matrix. Overall, it was the repairable wells that were hardest to classify. This is likely due in part to a class imbalance, but SMOTE was not able to correct the problem
+We built a Random Forest model and used a grid search to tweak hyperparameters. Our final model was reasonably accurate. Results were confirmed with a confusion matrix. Overall, it was the repairable wells that were hardest to classify. This is likely due in part to a class imbalance, but SMOTE was not able to correct the problem and indeed made our model worse.
 
 ### Interpret
+The most important features for our model were the geographic features, especially latitude, longitude, and gps_height. Other relevant strong features were waterpoint type and extraction method. 
 
+![](images/confusion_matrix.png)
+
+As this confusion matrix shows, we were better at predicting functional wells than non-functional. This could reflect a slight bias in the data - slightly more wells were functional than non-functional. 
+
+Overall, our model got the following score in the competition:
 
 
 
 ## Future Work
-- deal more thoroughly with data:
+- deal more thoroughly with data and cleaning:
     - impute missing long/lat data by using data from villages, basins, etc.
-    - create macro-categories for funders, schemes, and other features with too many categories
-- work on model-stacking to combine several models and hopefully increase accuracy5
+    - create more macro-categories for funders, schemes, and other features with too many categories
+- work on model-stacking to combine several models and hopefully increase accuracy 
+    - this could be exceptionally useful if we did KNN on the geographic data, for example. 

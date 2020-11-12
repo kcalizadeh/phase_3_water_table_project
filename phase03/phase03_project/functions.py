@@ -1,5 +1,6 @@
 import numpy as np
 import pandas as pd 
+import pickle
 
 from imblearn.over_sampling import SMOTE
 from imblearn.pipeline import Pipeline
@@ -25,44 +26,71 @@ import plotly.graph_objects as go
 
 class Cleaner(BaseEstimator):
     
-    def __init__( self, columns=None):
+    def __init__( self, columns=None, cat_features=None):
         self.columns = columns
+        self.cat_features = cat_features
     
     def fit( self, X, y = None ):
         return self 
     
     def transform( self, X, y = None):
         # fill blanks
-        X['public_meeting'] = X['public_meeting'].fillna(value='unknown', axis=0)
+        try:
+            X['public_meeting'] = X['public_meeting'].fillna(value='unknown', axis=0)
+        except:
+            X=X
+
         # consolidate rare groups into bigger groups
-        X['waterpoint_type_group'] = X['waterpoint_type_group'].map(lambda x: 'dam, trough, or spring' if x == 'dam' 
-                                                                                else 'dam, trough, or spring' if x == 'cattle trough' 
-                                                                                else 'dam, trough, or spring' if x == 'improved spring'
+        try:
+            X['waterpoint_type_group'] = X['waterpoint_type_group'].map(lambda x: 'dam, trough, or spring' if x.lower() == 'dam' 
+                                                                                else 'dam, trough, or spring' if x.lower() == 'cattle trough' 
+                                                                                else 'dam, trough, or spring' if x.lower() == 'improved spring'
+                                                                                else x.lower())
+        except:
+            X=X
+        try:
+            X['extraction_type_class'] = X['extraction_type_class'].map(lambda x: 'other' if x.lower() == 'wind-powered' 
+                                                                                else 'other' if x.lower() == 'rope pump' 
                                                                                 else x)
-        X['extraction_type_class'] = X['extraction_type_class'].map(lambda x: 'other' if x == 'wind-powered' 
-                                                                                else 'other' if x == 'rope pump' 
-                                                                                else x)
+        except:
+            X=X
+
+        try:                                                                                
         # take the top members of a category and group the rest together                                                            
-        X['management'] = X['management'].map(lambda x: x if x == 'vwc' 
-                                                            else x if x == 'wug' 
-                                                            else x if x == 'water board' 
-                                                            else x if x == 'wua' 
-                                                            else x if x == 'private operator' 
-                                                            else x if x == 'parastatal' 
+            X['management'] = X['management'].map(lambda x: x if x.lower() == 'vwc' 
+                                                            else x if x.lower() == 'wug' 
+                                                            else x if x.lower() == 'water board' 
+                                                            else x if x.lower() == 'wua' 
+                                                            else x if x.lower() == 'private operator' 
+                                                            else x if x.lower() == 'parastatal' 
                                                             else 'misc.')
-        X['funder'] = X['funder'].map(lambda x: x if x == 'Government Of Tanzania' 
+        except:
+            X=X
+        try:
+            X['funder'] = X['funder'].map(lambda x: x if x == 'Government Of Tanzania' 
                                                         else x if x == 'Danida' 
                                                         else x if x == 'Hesawa' 
                                                         else x if x == 'Rwssp' 
-                                                        else x if x == 'World Bank' 
+                                                        else x if x== 'World Bank' 
                                                         else x if x == 'World Vision' 
                                                     else 'misc.')
-        X['installer'] = X['installer'].map(lambda x: x if x == 'DWE' 
+        except:
+            X=X
+        try:                                                    
+            X['installer'] = X['installer'].map(lambda x: x if x == 'DWE' 
                                                         else x if x == 'Government' 
                                                         else x if x == 'RWE' 
                                                         else 'misc.')
+        except:
+            X=X            
+
+        try:
+            X['district_code'] = X['district_code'].map(lambda x: str(x) if 0 < x < 6 else 'other')
+        except:
+            X=X
+        
         # dummify categorical columns
-        X = pd.get_dummies(X)
+        X = pd.get_dummies(X, columns=self.cat_features)
         return X
 
 def assess_categorical_correlation_printout(column_name, dataframe):
@@ -140,15 +168,15 @@ def plot_comparison_chart(category, df, overall=False, norm_line=False, cmap='Pa
     plt.ylabel('Percent', size='x-large')
     ax.tick_params(axis='x', labelsize=12)
     vals = ax.get_yticks()
-    ax.set_yticklabels(['{:.0%}'.format(x) for x in vals])
+    ax.set_yticklabels(['{:.0%}'.format(x) for x in vals], fontsize='large')
     return ax
 
-def plot_pretty_cf(predictor, xtest, ytest, cmap='binary', normalize='true', title=None):
+def plot_pretty_cf(predictor, xtest, ytest, cmap='Blues', normalize='true', title=None):
     fig, ax = plt.subplots(figsize=(8, 8))
     plot_confusion_matrix(predictor, xtest, ytest, cmap=cmap, normalize=normalize, ax=ax)
     ax.set_title(title, size='x-large')
-    ax.set_yticklabels(['Functional', 'Needs Repair', 'Non-Functional'])
-    ax.set_xticklabels(['Functional', 'Needs Repair', 'Non-Functional'])
+    ax.set_yticklabels(['Functional', 'Functional \nNeeds Repair', 'Non-Functional'])
+    ax.set_xticklabels(['Functional', 'Functional \nNeeds Repair', 'Non-Functional'])
     ax.set_xlabel('Predicted Label', size='large')
     ax.set_ylabel('True Label', size='large')
     plt.show()
