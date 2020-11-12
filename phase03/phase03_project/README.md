@@ -37,8 +37,10 @@ Overall, our model got the following score in the competition:
 
 
 ## Future Work
-- deal more thoroughly with data and cleaning:
+- try to find features that uniquely identify the wells in need of repair, since those should be our top priorities
+- work to chart out the most water-starved regions. Many broken wells exist adjacent to functioning wells; when it comes to actually improving people's lives, fixing those wells is not as important as focusing on areas where there are fewer functioning wells per person.
+- deal more thoroughly with data cleaning:
     - impute missing long/lat data by using data from villages, basins, etc.
     - create more macro-categories for funders, schemes, and other features with too many categories
-- work on model-stacking to combine several models and hopefully increase accuracy 
-    - this could be exceptionally useful if we did KNN on the geographic data, for example. 
+- work on model-stacking to combine several models and hopefully increase accuracy
+    - this could be exceptionally useful if we did KNN on the geographic data, for example.
