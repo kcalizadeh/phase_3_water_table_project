@@ -2,11 +2,11 @@
 ![title](images/well.jpg)
 #### Repo Contents:
 - a [folder](https://github.com/kcalizadeh/phase_3_water_table_project/tree/master/phase03/phase03_project/pump_data) containing data used in the project
-- a folder containing relevant images
-- an EDA notebook containing some visualizations and exploration
-- a model notebook explaining our model and going over various iterations
-- a functions file containing custom functions and imports used in both notebooks
-- a slide deck presentation of the findings
+- a [folder](https://github.com/kcalizadeh/phase_3_water_table_project/tree/master/phase03/phase03_project/images) containing relevant images
+- an [EDA notebook](https://github.com/kcalizadeh/phase_3_water_table_project/blob/master/phase03/phase03_project/EDA_notebook.ipynb) containing some visualizations and exploration
+- a [model notebook](https://github.com/kcalizadeh/phase_3_water_table_project/blob/master/phase03/phase03_project/model_notebook.ipynb) explaining our model and going over various iterations
+- a [functions.py file](https://github.com/kcalizadeh/phase_3_water_table_project/blob/master/phase03/phase03_project/functions.py) containing custom functions and imports used in both notebooks
+- a [slide deck presentation](https://github.com/kcalizadeh/phase_3_water_table_project/blob/master/phase03/phase03_project/presentation.pdf) of the findings
 
 This repo contains work for the Pump It Up data science competition. The competition website can be found [here](https://www.drivendata.org/competitions/7/pump-it-up-data-mining-the-water-table/page/23/).
 
