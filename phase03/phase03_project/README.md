@@ -1,7 +1,7 @@
 # Pump It Up: Data Mining the Water Table
 ![title](images/well.jpg)
 #### Repo Contents:
-- a folder containing data used in the project
+- a [folder](https://github.com/kcalizadeh/phase_3_water_table_project/tree/master/phase03/phase03_project/pump_data) containing data used in the project
 - a folder containing relevant images
 - an EDA notebook containing some visualizations and exploration
 - a model notebook explaining our model and going over various iterations
@@ -36,8 +36,7 @@ The most important features for our model were the geographic features, especial
 
 As this confusion matrix shows, we were better at predicting functional wells than non-functional. This could reflect a slight bias in the data - slightly more wells were functional than non-functional. 
 
-Overall, our model got the following score in the competition:
-
+A cost matrix analysis and more interpretation is included in the model notebook.
 
 
 ## Future Work
